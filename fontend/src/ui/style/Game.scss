@@ -1,15 +1,87 @@
+$grape: #4A1F55;
+$glacier: #b0d3e0;
+$orange: #F7835C;
+$violet: #C189D9;
+$red: #64003C;
+
+@font-face{
+    font-family: Magiel-Black;
+    src: url('./fonts/Magiel-Black.ttf'),
+         url('./fonts/Magiel-Black.otf');}    
+
 .Game{
     justify-content: center;
     align-items: center;
+    display: flex;
+    flex-direction: column;
+    font-size: x-large;
+    margin-top: 10%;
+    padding: 30px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+.create{
+    margin-bottom: 10px;
+    button{
+        border: none;
+        font-size: large;
+        cursor: pointer;
+        padding: 10px;
+        margin-left: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+    .unchecked{
+        background-color: $violet;
+    }
+    .checked{
+        background-color: $orange;
+    }
 }
 .pod{
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
     justify-self: center;
     text-align: center;
     display: table;
+    margin: 2px;
     span{
         display: table-cell;
         vertical-align: middle;
+    }
+}
+.clikcpod{
+    width: 70px;
+    height: 70px;
+    justify-self: center;
+    text-align: center;
+    display: table;
+    background-color: rgba(176, 211, 224,  0.3);
+    border: none;
+    margin: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: large;
+    color: $grape;
+}
+.clikcpod:focus{background-color: rgba(176, 211, 224,  0.6);}
+.buttons{
+    button{
+        background-color: $violet;
+        color: $grape;
+        border: none;
+        padding: 20px;
+        width: 100px;
+        font-size: large;
+        border-radius: 10px;
+        margin: 10px;
+        margin-left: 30px;
+        margin-right: 30px;
+        cursor: pointer;
+    }
+    button:hover{
+        background-color: $orange;
     }
 }
