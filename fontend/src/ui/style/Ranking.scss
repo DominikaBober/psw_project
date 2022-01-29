@@ -1,0 +1,22 @@
+.Ranking{
+    margin-top: 10%;
+    padding: 30px;
+    span{
+        margin: 5px;
+    }
+    #right{
+        align-self: flex-end;
+        justify-self: flex-end;
+        text-align:right;
+    }
+    #left{
+        text-align: left;
+    }
+    #center{text-align: right;}
+    .nag{
+        font-size: xx-large;
+    }
+    .nag_2{
+        font-size: x-large;
+    }
+}
