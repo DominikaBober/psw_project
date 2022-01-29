@@ -1,0 +1,18 @@
+{
+ "03fc96da-1f1f-4932-a471-32abf9a7d525": {
+  "plate": [[2,1],[1,2]],
+  "top_text": [1,2],
+  "left_text": [1,2],
+  "bottom_text": [2,1],
+  "right_text": [2,1
+  ]
+ },
+ "d763a794-4e0b-4443-a973-83ed99d1a64f": {
+  "plate": [[1,2],[2,1]],
+  "top_text": [2,1],
+  "left_text": [2,1],
+  "bottom_text": [1,2],
+  "right_text": [1,2
+  ]
+ }
+}
