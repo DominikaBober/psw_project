@@ -23,15 +23,35 @@ router.get('/:id', async (req, res) => {
     return res.send(player);
 });
 
+router.get('/login/:login', async (req, res) => {
+    const login = req.params.login;
+    const playerRows = await client.query("SELECT * FROM players WHERE login = $1", [login]); 
+    const player = playerRows.rows[0];
+    if(!player) {
+        return res.status(400).send(messages.ELEMENT_NOT_EXIST);
+    }
+    return res.send(player);
+});
+
+router.post('/login', async (req, res) => {
+    const playerToLog = req.body;
+    const playerRows = await client.query("SELECT password FROM players WHERE login = $1", [playerToLog.login]); 
+    const player = playerRows.rows[0];
+    if(!player) {
+        return res.status(400).send(messages.ELEMENT_NOT_EXIST);
+    }
+    return res.send(player === playerToLog.password);
+});
+
 router.post('/', async (req, res) => {
     const playerToAdd = req.body;
-    const duplicate = await client.query("SELECT * FROM players WHERE login = $1", [ playerToAdd.login, id ]);
+    const duplicate = await client.query("SELECT * FROM players WHERE login = $1", [ playerToAdd.login]);
     if(duplicate.rows[0]) {
         return res.status(500).send(messages.LOGIN_DUPLICATE);
     }
     const insertedPlayerRows = await client.query(
-        "INSERT INTO players (login, password, login_date, score, played_games) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, 0, 0]
+        "INSERT INTO players (login, password, login_date, score, played_games, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, 0, 0, playerToAdd.role]
     );
     const insertedplayer = insertedPlayerRows.rows[0];
     return res.send(insertedplayer);  
@@ -46,8 +66,8 @@ router.put('/:id', async (req, res) => {
             return res.status(500).send(messages.PLAYER_NOT_EXISTS);
         }
     }
-    const result = await client.query(`UPDATE movie SET login = $1, password = $2, login_date = $3, score = $4, played_games = $5 WHERE id = $6`,
-    [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, playerToAdd.score, playerToAdd.played_games, id]
+    const result = await client.query(`UPDATE movie SET login = $1, password = $2, login_date = $3, score = $4, played_games = $5 role = $6 WHERE id = $7`,
+    [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, playerToAdd.score, playerToAdd.played_games, playerToAdd.role, id]
     );
     return result.rowCount > 0 ? res.send(playerToAdd) : res.sendStatus(400);
 });

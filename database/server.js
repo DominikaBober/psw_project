@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS players (
   password VARCHAR(60) NOT NULL,
   login_date DATE NOT NULL,
   score INTEGER NOT NULL,
-  played_games INTEGER NOT NULL
+  played_games INTEGER NOT NULL,
+  role VARCHAR(60) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS games (
