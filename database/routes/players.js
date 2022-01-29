@@ -28,9 +28,9 @@ router.get('/login/:login', async (req, res) => {
     const playerRows = await client.query("SELECT * FROM players WHERE login = $1", [login]); 
     const player = playerRows.rows[0];
     if(!player) {
-        return res.status(400).send(messages.ELEMENT_NOT_EXIST);
+        return res.send(false);
     }
-    return res.send(player);
+    return res.send(true);
 });
 
 router.post('/login', async (req, res) => {
@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
     if(!player) {
         return res.status(400).send(messages.ELEMENT_NOT_EXIST);
     }
-    return res.send(player === playerToLog.password);
+    return res.send(player.password === playerToLog.password);
 });
 
 router.post('/', async (req, res) => {
