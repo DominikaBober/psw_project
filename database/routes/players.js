@@ -9,7 +9,7 @@ const messages = {
 };
 
 router.get('/', async (req, res) => {
-    const players = await client.query("SELECT * FROM players");
+    const players = await client.query("SELECT id, login, score, played_games, role FROM players");
     return res.send(players.rows);
 });
 
