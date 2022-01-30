@@ -2,7 +2,7 @@ import './style/App.scss';
 import { useEffect, useState } from "react";
 import {Formik, Form, Field} from "formik";
 import {Route, Switch, Link} from 'react-router-dom';
-import { connect } from 'react-redux'
+import Cookies from 'js-cookie';
 
 import Game from "./Game"
 import Popup from "./popup";
@@ -34,20 +34,36 @@ function App() {
     const handleLogin = async (values,actions) => {
         if (isUserCreate){
             const exist = await check_if_exists(values.login);
-            if (!exist.data){
-                const new_user = await create_user(values);
-                if (new_user.status === 200){setIsLogin(true);}
-            }else{
-                set_login_error("user exists")
+            if (exist.status === 200){
+                if (!exist.data){
+                    const new_user = await create_user(values);
+                    if (new_user.status === 200){
+                        Cookies.set(`loggedUserLogin`, values.login);
+                        Cookies.set(`loggedUserId`, new_user.data.id);
+                        setPlayer(Cookies.get(`loggedUser`));
+                        setIsLogin(true);
+                    }
+                }else{
+                    set_login_error("user exists")
+                }
             }
         }else{
             const exist = await check_if_exists(values.login);
-            if (exist.data){
+            if (exist.status === 200){
+                if (exist.data){
                 const login = await check_if_good_password(values);
-                if (login.data){setIsLogin(true);}
-                else{set_password_error("wrong password")}
-            }else{
-                set_login_error("user does not exists")
+                    if (login.status === 200){
+                        if(login.data.password){
+                            Cookies.set(`loggedUserLogin`, values.login);
+                            Cookies.set(`loggedUserId`, login.data.id);
+                            setPlayer(Cookies.get(`loggedUser`));
+                            setIsLogin(true);
+                        }
+                        else{set_password_error("wrong password")}
+                    }
+                }else{
+                    set_login_error("user does not exists")
+                }
             }
         }
     }
