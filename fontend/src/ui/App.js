@@ -2,13 +2,19 @@ import './style/App.scss';
 import { useEffect, useState } from "react";
 import {Formik, Form, Field} from "formik";
 import {Route, Switch, Link} from 'react-router-dom';
+import { connect } from 'react-redux'
+
 import Game from "./Game"
 import Popup from "./popup";
 import Footer from './Footer';
+import Ranking from './Ranking';
+import Player from './Player';
 
 import { create_user, check_if_good_password, check_if_exists } from '../ducks/login/actions';
 
-const Redux = require('redux');
+const fs = require('fs');
+const fsPromises = fs.promises;
+const rules = require('../ducks/game/rules.json').rules
 
 function App() {
 
@@ -17,20 +23,20 @@ function App() {
     const [isUserCreate, setIsUserCreate] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [popupContext, setPopupContext] = useState("");
-    const [login_error, set_login_error] = useState("required")
-    const [password_error, set_password_error] = useState("required")
+    const [login_error, set_login_error] = useState("")
+    const [password_error, set_password_error] = useState("")
     const [isError, setIsError] = useState(false);
     const [player, setPlayer] = useState([])
     const [classes, setClasses] = useState(["checked", "checked"])
-    const ValidateLogin = (value) => {if (!value) return login_error}
-    const ValidatePassword = (value) => {if (!value) return password_error}
+    const ValidateLogin = (value) => {if (!value) return "required"}
+    const ValidatePassword = (value) => {if (!value) return "required"; if (value.length < 4) return "password too short"}
 
     const handleLogin = async (values,actions) => {
         if (isUserCreate){
             const exist = await check_if_exists(values.login);
             if (!exist.data){
                 const new_user = await create_user(values);
-                if (new_user.status === 200){setIsLogin(true)}
+                if (new_user.status === 200){setIsLogin(true);}
             }else{
                 set_login_error("user exists")
             }
@@ -38,13 +44,17 @@ function App() {
             const exist = await check_if_exists(values.login);
             if (exist.data){
                 const login = await check_if_good_password(values);
-                if (login.data){setIsLogin(true)}
+                if (login.data){setIsLogin(true);}
                 else{set_password_error("wrong password")}
             }else{
                 set_login_error("user does not exists")
             }
         }
     }
+
+    useEffect(()=>{
+
+    },[isLogin, login_error, password_error])
     
   
   return (
@@ -53,7 +63,7 @@ function App() {
         {!isLogin ? (
             <div className="Login_Page" id="content">
                     <div className="rules">
-                        Pyramids game is to cossbszvblabvwbvlwbr vebvwalbvkabvsbvjskvkjszdbvjsdbvjsbv
+                        {rules}
                     </div>
                     <div className="row">
                         <button className={classes[0]} onClick={() => {
@@ -73,9 +83,11 @@ function App() {
                                 <div id="pole">login</div>
                                 <Field name="login" id="pole" validate={ValidateLogin}/>
                                 {errors.login && touched.login && <div className="sorry">{errors.login}</div>}
+                                {login_error !== "" && <div className="sorry">{login_error}</div>}
                                 <div id="pole">password</div>
                                 <Field type="password" name="password" id="pole" validate={ValidatePassword}/>
                                 {errors.password && touched.password && <div className="sorry">{errors.password}</div>}
+                                {password_error !== "" && <div className="sorry">{password_error}</div>}
                                 <button type="submit" id="pole" className="checked">
                                 Submit
                                 </button>
@@ -90,6 +102,12 @@ function App() {
                     <Route exact path="/play">
                         <Game size={3}/>
                     </Route>
+                    <Route exact path="/ranking">
+                        <Ranking/>
+                    </Route>
+                    <Route exact path="/player/:id">
+                        <Player/>
+                    </Route>
                 </Switch>
             </div>
         )}
@@ -101,22 +119,15 @@ function App() {
     </div>
   );
 }
-
+  
 export default App;
 
 function Navbar() {
   return (
       <div className="nav">
-            <Link to="/ranking" id="link"><a>Ranking</a></Link>
-            <Link to="/play"  id="link"><a>Play</a></Link>
+            <Link to="/ranking" id="link">Ranking</Link>
+            <Link to="/play"  id="link">Play</Link>
             {/* <Link to="/profile"><a>Your Profile</a></Link> */}
       </div>
   );
 }
-
-// /movies/add - formularz umożliwiający dodanie filmu (z polami id, title, productionYear)
-// /movies/:id - szczegóły wybranego filmu. Oprócz danych filmu, powinny się wyświetlić dane reżysera, którzy grają w danym filmie. Powinna być możliwość wybrania reżysera z listy istniejących.
-// /directors - lista reżyserów
-// /directors/add - formularz umożliwiający dodanie reżysera (z polami id, firstName, lastName, age).
-// /directors/:id - szczegóły danego reżysera.
-// /directors/:id/edit 
