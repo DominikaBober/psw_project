@@ -68,6 +68,16 @@ $red: #64003C;
 }
 .clikcpod:focus{background-color: rgba(176, 211, 224,  0.6);}
 .buttons{
+    .field{
+        height: min-content;
+        align-self: center;
+        text-align: center;
+        background-color: rgba(176, 211, 224,  0.5);
+        border: none;
+        color: $grape;
+        padding: 10px;
+        font-size: medium;
+    }
     button{
         background-color: $violet;
         color: $grape;
