@@ -1,3 +1,10 @@
+$grape: #4A1F55;
+$glacier: #b0d3e0;
+$orange: #F7835C;
+$violet: #C189D9;
+$red: #64003C;
+$bright_red: #F04951;
+
 .Ranking{
     margin-top: 10%;
     padding: 30px;
@@ -18,5 +25,8 @@
     }
     .nag_2{
         font-size: x-large;
+    }
+    #grid2:hover{
+        color: $red;
     }
 }
