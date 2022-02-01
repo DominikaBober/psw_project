@@ -1,4 +1,5 @@
 import axios from "axios";
+import Client from "../mqtt/MQTT";
 
 export const check_if_exists = async (login) => {
     return await axios.get(`http://localhost:5000/players/login/${login}`)
@@ -13,7 +14,10 @@ export const check_if_exists = async (login) => {
 export const check_if_good_password = async (values) => {
     return await axios.post(`http://localhost:5000/players/login`, values)
         .then((response) => {
-            return response;
+            if (response.status === 200){
+                if (Client.connected){Client.publish("userLogs", `user ${values.login} logged in`)}
+                return response
+            }
         }).catch((error)=>{
             console.log(error);
             return {status: 500};
@@ -29,6 +33,7 @@ export const create_user = async (values) => {
     }
     return await axios.post(`http://localhost:5000/players`, playertoCreate)
         .then((response) => {
+            if (Client.connected){Client.publish("userLogs", `user ${values.login} registered`)}
             return response;
         }).catch((error)=>{
             console.log(error);
