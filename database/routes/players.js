@@ -9,7 +9,7 @@ const messages = {
 };
 
 router.get('/', async (req, res) => {
-    const players = await client.query("SELECT id, login, score, played_games, role FROM players");
+    const players = await client.query("SELECT id, login, role FROM players");
     return res.send(players.rows);
 });
 
@@ -35,12 +35,15 @@ router.get('/login/:login', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const playerToLog = req.body;
-    const playerRows = await client.query("SELECT password FROM players WHERE login = $1", [playerToLog.login]); 
+    const playerRows = await client.query("SELECT id, password FROM players WHERE login = $1", [playerToLog.login]); 
     const player = playerRows.rows[0];
     if(!player) {
         return res.status(400).send(messages.ELEMENT_NOT_EXIST);
     }
-    return res.send(player.password === playerToLog.password);
+    if (player.password === playerToLog.password){
+        return res.send({password: true, id: player.id});
+    }
+    return res.send({password: false});
 });
 
 router.post('/', async (req, res) => {
@@ -50,8 +53,8 @@ router.post('/', async (req, res) => {
         return res.status(500).send(messages.LOGIN_DUPLICATE);
     }
     const insertedPlayerRows = await client.query(
-        "INSERT INTO players (login, password, login_date, score, played_games, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-        [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, 0, 0, playerToAdd.role]
+        "INSERT INTO players (login, password, login_date, role) VALUES ($1, $2, $3, $4) RETURNING id",
+        [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, playerToAdd.role]
     );
     const insertedplayer = insertedPlayerRows.rows[0];
     return res.send(insertedplayer);  
@@ -66,26 +69,26 @@ router.put('/:id', async (req, res) => {
             return res.status(500).send(messages.PLAYER_NOT_EXISTS);
         }
     }
-    const result = await client.query(`UPDATE movie SET login = $1, password = $2, login_date = $3, score = $4, played_games = $5 role = $6 WHERE id = $7`,
-    [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, playerToAdd.score, playerToAdd.played_games, playerToAdd.role, id]
+    const result = await client.query(`UPDATE players SET login = $1, password = $2, login_date = $3, role = $5 WHERE id = $6`,
+    [playerToAdd.login, playerToAdd.password, playerToAdd.login_date, playerToAdd.role, id]
     );
     return result.rowCount > 0 ? res.send(playerToAdd) : res.sendStatus(400);
 });
 
-router.put('/:id/score', async (req, res) => {
-    const newScore = req.body;
-    const result = await client.query(`UPDATE movie SET score = $1 WHERE id = $2`,
-    [newScore, id]
-    );
-    return result.rowCount > 0 ? res.send(playerToAdd) : res.sendStatus(400);
-});
+// router.put('/:id/score', async (req, res) => {
+//     const newScore = req.body;
+//     const result = await client.query(`UPDATE players SET score = $1 WHERE id = $2`,
+//     [newScore, id]
+//     );
+//     return result.rowCount > 0 ? res.send(playerToAdd) : res.sendStatus(400);
+// });
 
-router.put('/:id/add_game', async (req, res) => {
-    const result = await client.query(`UPDATE movie SET played_games = played_games + 1 WHERE id = $2`,
-    [newScore, id]
-    );
-    return result.rowCount > 0 ? res.send(playerToAdd) : res.sendStatus(400);
-});
+// router.put('/:id/add_game', async (req, res) => {
+//     const result = await client.query(`UPDATE players SET played_games = played_games + 1 WHERE id = $2`,
+//     [newScore, id]
+//     );
+//     return result.rowCount > 0 ? res.send(playerToAdd) : res.sendStatus(400);
+// });
 
 router.delete('/:id', async (req, res) => {
     const id = req.params.id;
