@@ -9,10 +9,12 @@ import Popup from './popup';
 
 import { check_results } from '../ducks/game/functions/game';
 import { save_game, get_player_games, finish_game, update_game } from '../ducks/game/actions';
+import Client from '../ducks/mqtt/MQTT';
 
 const all_games_2 = require('./../ducks/game/all_games/all_games_2.json');
 const all_games_3 = require('./../ducks/game/all_games/all_games_3.json');
 const all_games_4 = require('./../ducks/game/all_games/all_games_4.json');
+const resources = require('./../ducks/resources.json');
 
 export default function Game() {
 
@@ -22,17 +24,29 @@ export default function Game() {
     const [player, setPlayer] = useState({login: Cookies.get(`loggedUserLogin`), id: Cookies.get(`loggedUserId`)})
     const [playerGames, setPlayerGames] = useState([])
     const sizes = [2, 3, 4]
+    const difficulty_levels = [1, 2, 3, 4, 5]
     const [size, setSize] = useState(3);
+    const [difficulty, setDifficulty] = useState(3);
     const [isError, setIsError] = useState(true);
     const [buttonClasses, setButtonClasses] = useState(["unchecked", "checked", "unchecked"]);
     const [all_games, set_all_games] = useState([]);
     const [yourGame, setYourGame] = useState([]);
     const [gamePlate, setGamePlate] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isRulesOpen, setIsRulesOpen] = useState(false);
+    const [rules, setRules] = useState("");
     const [isWrong, setIsWrong] = useState(false);
     const [gameEnded, setGameEnded] = useState(false);
     const [popupContext, setPopupContext] = useState("");
     const [all_results, set_all_results] = useState([]);
+    
+    if (Client.connected){
+        Client.on("message", (topic, message) => {
+            if (topic === "rules"){
+                setRules(message.toString());
+            }
+        })
+    }
 
     const ValidateSave = (value) => {
         if (!value) return "required";
@@ -215,6 +229,11 @@ export default function Game() {
         {!isError ? (
         <>
         <div className="Game" id="content">
+            <div id="grid2">
+                <button className="rulesbutton" id="left" onClick={() => {
+                    if (Client.connected){Client.publish("rules", resources.rules)}
+                    setIsRulesOpen(!isRulesOpen);
+                }}>?</button>
             {isSavedGame ? (
                 <div className="buttons">
                     <button onClick={()=>{
@@ -235,6 +254,7 @@ export default function Game() {
                     </button>
                 )}
             </div>)}
+            </div>
             <div className="top_text" id="row">
                 {yourGame.top_text.map(el => 
                     <div className="pod"><span>{el}</span></div>
@@ -303,6 +323,11 @@ export default function Game() {
             content={popupContext}
             handleClose={() => {setIsOpen(false)}}
         />}
+        {isRulesOpen && 
+            <div className="rules">
+                {rules}
+            </div>
+        }
         </>
         ):(
             <div className="content">No game under that name</div>
