@@ -1,8 +1,7 @@
 const Popup = props => {
     return (
         <div className="popup-box">
-            <div className="box">
-                <span className="close-icon" onClick={props.handleClose}>&#10006;</span>
+            <div className="box" onClick={props.handleClose}>
                 {props.content}
             </div>
         </div>
