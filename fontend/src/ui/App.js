@@ -3,19 +3,24 @@ import { useEffect, useState } from "react";
 import {Formik, Form, Field} from "formik";
 import {Route, Switch, Link} from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { MQTT } from '../ducks/mqtt/MQTT';
 
 import Game from "./Game"
 import Popup from "./popup";
 import Footer from './Footer';
 import Ranking from './Ranking';
 import Player from './Player';
+import Home from './Home';
+import Chat from './Chat';
 import LoadGame from './LoadGame';
 
 import { create_user, check_if_good_password, check_if_exists } from '../ducks/login/actions';
+import Client from '../ducks/mqtt/MQTT';
 
 const fs = require('fs');
 const fsPromises = fs.promises;
-const rules = require('../ducks/game/rules.json').rules
+const resources = require('./../ducks/resources.json');
+MQTT()
 
 function App() {
 
@@ -29,8 +34,18 @@ function App() {
     const [isError, setIsError] = useState(false);
     const [player, setPlayer] = useState([])
     const [classes, setClasses] = useState(["checked", "checked"])
+    const [isRulesOpen, setIsRulesOpen] = useState(false);
+    const [rules, setRules] = useState("");
     const ValidateLogin = (value) => {if (!value) return "required"}
     const ValidatePassword = (value) => {if (!value) return "required"; if (value.length < 4) return "password too short"}
+
+    if (Client.connected){
+        Client.on("message", (topic, message) => {
+            if (topic === "rules"){
+                setRules(message.toString());
+            }
+        })
+    }
 
     const handleLogin = async (values,actions) => {
         if (isUserCreate){
@@ -79,8 +94,8 @@ function App() {
         <Link to="/"><div className="home_nag">Pyramids</div></Link>
         {!isLogin ? (
             <div className="Login_Page" id="content">
-                    <div className="rules">
-                        {rules}
+                    <div className="startrules">
+                        {resources.rules}
                     </div>
                     <div className="row">
                         <button className={classes[0]} onClick={() => {
@@ -114,7 +129,12 @@ function App() {
             </div>
         ):(
             <div>
+                <button className="rulesbutton" id="left" onClick={() => {
+                    if (Client.connected){Client.publish("rules", resources.rules)}
+                    setIsRulesOpen(!isRulesOpen);
+                }}>Game Rules</button>
                 <div className="nav" id="row">
+                        <Link to="/chat"  id="link">Chat</Link>
                         <Link to="/ranking" id="link">Ranking</Link>
                         <Link to="/play"  id="link">Play</Link>
                         <div className="profile" id="col">
@@ -127,8 +147,17 @@ function App() {
                         </div>
                 </div>
                 <Switch className="content">
-                    <Route exact path="/play">
+                    <Route exact path="/">
+                        <Home />
+                    </Route>
+                    <Route path="/play/:save_name">
                         <Game size={3}/>
+                    </Route>
+                    <Route path="/play">
+                        <Game size={3}/>
+                    </Route>
+                    <Route exact path="/chat">
+                        <Chat/>
                     </Route>
                     <Route exact path="/ranking">
                         <Ranking/>
@@ -136,10 +165,20 @@ function App() {
                     <Route exact path="/player/:id">
                         <Player/>
                     </Route>
-                    <Route exact path="/play/:save_name">
+                    {/* <Route exact path="/play/:save_name">
                         <LoadGame/>
+                    </Route> */}
+                    <Route  path="/*">
+                        <div className="error" id="content">
+                            Page not found
+                        </div>
                     </Route>
                 </Switch>
+                {isRulesOpen && 
+                    <div className="rules">
+                        {rules}
+                    </div>
+                }
             </div>
         )}
         {isOpen && <Popup

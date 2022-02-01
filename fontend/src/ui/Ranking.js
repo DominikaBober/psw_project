@@ -3,17 +3,19 @@ import { useEffect, useState } from "react"
 import { Link } from 'react-router-dom';
 
 import { get_players } from "../ducks/login/actions";
+import { get_games } from '../ducks/game/actions';
 
 export default function Ranking(){
 
     const [players, setPlayers] = useState([])
+    const [games, setGames] = useState([])
 
     useEffect(() => { (async () => {
-        if (players.length === 0){
         const users = await get_players();
         if (users.status === 200){setPlayers(users.data)}
-        }
-    })()}, [players])
+        const all_games = await get_games();
+        if (all_games.status === 200){setGames(all_games.data)}
+    })()}, [])
 
     return(
         <div className="Ranking" id="content">
@@ -24,11 +26,17 @@ export default function Ranking(){
                     {/* <span id="center">Played games</span> */}
                     <span id="right">Score</span>
                 </div>
-                {players.sort((a, b) => { if(a.score>b.score){return -1}else{return 1}}).map(player => 
+                {players.sort((a, b) => { if(games.filter(game => game.player_id === a.id)
+                                .filter(game => game.finished === true)
+                                .map(game => game.score).reduce((a, b) => {return a+b},0)>games.filter(game => game.player_id === b.id)
+                                .filter(game => game.finished === true)
+                                .map(game => game.score).reduce((a, b) => {return a+b},0)){return -1}else{return 1}}).map(player => 
                     <Link id="grid2" to={`/player/${player.id}`} key={player.login}>
                         <span id="left">{player.login}</span>
                         {/* <span id="center">{player.played_games}</span> */}
-                        <span id="right">{player.score}</span>
+                        <span id="right">{games.filter(game => game.player_id === player.id)
+                                .filter(game => game.finished === true)
+                                .map(game => game.score).reduce((a, b) => {return a+b},0)}</span>
                     </Link>
                 )}
             </div>

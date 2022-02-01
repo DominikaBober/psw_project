@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 
 import Popup from './popup';
 
-import { check_results } from '../ducks/game/functions/game';
+import { check_results } from '../ducks/game/game';
 import { update_game, get_player_games, finish_game } from "../ducks/game/actions";
 
 const all_games_2 = require('./../ducks/game/all_games/all_games_2.json');

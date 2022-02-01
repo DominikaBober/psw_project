@@ -7,14 +7,13 @@ import Cookies from 'js-cookie';
 
 import Popup from './popup';
 
-import { check_results } from '../ducks/game/functions/game';
+import { check_results, create_game } from '../ducks/game/game';
 import { save_game, get_player_games, finish_game, update_game } from '../ducks/game/actions';
-import Client from '../ducks/mqtt/MQTT';
 
 const all_games_2 = require('./../ducks/game/all_games/all_games_2.json');
 const all_games_3 = require('./../ducks/game/all_games/all_games_3.json');
 const all_games_4 = require('./../ducks/game/all_games/all_games_4.json');
-const resources = require('./../ducks/resources.json');
+
 
 export default function Game() {
 
@@ -28,25 +27,17 @@ export default function Game() {
     const [size, setSize] = useState(3);
     const [difficulty, setDifficulty] = useState(3);
     const [isError, setIsError] = useState(true);
-    const [buttonClasses, setButtonClasses] = useState(["unchecked", "checked", "unchecked"]);
+    const [sizeButtonClasses, setSizeButtonClasses] = useState(["unchecked", "checked", "unchecked"]);
+    const [difficultyButtonClasses, setDifficultyButtonClasses] = useState(["unchecked", "unchecked", "checked", "unchecked", "unchecked"]);
     const [all_games, set_all_games] = useState([]);
     const [yourGame, setYourGame] = useState([]);
     const [gamePlate, setGamePlate] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [isRulesOpen, setIsRulesOpen] = useState(false);
-    const [rules, setRules] = useState("");
     const [isWrong, setIsWrong] = useState(false);
     const [gameEnded, setGameEnded] = useState(false);
     const [popupContext, setPopupContext] = useState("");
     const [all_results, set_all_results] = useState([]);
     
-    if (Client.connected){
-        Client.on("message", (topic, message) => {
-            if (topic === "rules"){
-                setRules(message.toString());
-            }
-        })
-    }
 
     const ValidateSave = (value) => {
         if (!value) return "required";
@@ -54,7 +45,8 @@ export default function Game() {
     }
 
     useEffect(()=>{
-        if (isSavedGame){
+        if (save_name === undefined){setIsSavedGame(false)}
+        if (save_name !== undefined){
             (async () => {
             const games = await get_player_games(Cookies.get(`loggedUserId`))
             if (games.status === 200){
@@ -80,18 +72,26 @@ export default function Game() {
                 setPlayerGames(games.data)
             })()
             const temp_all_games = parseInt(size) === 2 ? all_games_2 : parseInt(size) === 3 ? all_games_3 : all_games_4;
-            const temp_your_game = temp_all_games[Object.keys(temp_all_games)[Math.floor(Math.random()*Object.keys(temp_all_games).length)]]
-            let temp_classes = ["unchecked", "unchecked", "unchecked"];
-            temp_classes[size-2] = "checked"
+            let temp_your_game = temp_all_games[Object.keys(temp_all_games)[Math.floor(Math.random()*Object.keys(temp_all_games).length)]]
+            const temp_texts = create_game(temp_your_game, difficulty)
+            temp_your_game.top_text = temp_texts.top_text
+            temp_your_game.bottom_text = temp_texts.bottom_text
+            temp_your_game.left_text = temp_texts.left_text
+            temp_your_game.right_text = temp_texts.right_text
+            let temp_size_classes = ["unchecked", "unchecked", "unchecked"];
+            let temp_diff_classes = ["unchecked", "unchecked", "unchecked", "unchecked", "unchecked"]
+            temp_size_classes[size-2] = "checked"
+            temp_diff_classes[difficulty-1] = "checked"
             set_all_games(temp_all_games);
             setYourGame(temp_your_game);
             setGamePlate(temp_your_game.plate.map(row => row.map(el => 0)))
             set_all_results(check_results(temp_your_game, temp_all_games));
-            setButtonClasses(temp_classes);
+            setSizeButtonClasses(temp_size_classes);
+            setDifficultyButtonClasses(temp_diff_classes);
             setIsError(false)
         }
         Cookies.set(`startGameDate`, new Date().toISOString().slice(0, 19).replace('T', ' '));
-    },[size])
+    },[size, difficulty, save_name])
 
     const handlePodChange = (i, j) => {
         let temp = gamePlate
@@ -129,7 +129,12 @@ export default function Game() {
                         setPopupContext("Congrats, you won !!");
                         setIsOpen(true);
                         setTimeout(() => setGameEnded(true), 2000);
-                        setTimeout(() => setIsOpen(false), 3000);
+                        setTimeout(() => {
+                            setIsOpen(false)
+                            window.location.replace(`/player/${player.id}`);
+                        }, 2000);
+                        
+                        
                     }
                 })()
             (async () => {
@@ -149,7 +154,7 @@ export default function Game() {
                             right_text: yourGame.right_text
                         }),
                         finished: true,
-                        score: gamePlate.length**2,
+                        score: difficulty*gamePlate.length**2,
                         save: null,
                         player_id: player.id
                     };
@@ -160,7 +165,7 @@ export default function Game() {
                         setPopupContext("Congrats, you won !!");
                         setIsOpen(true);
                         setTimeout(() => setGameEnded(true), 2000);
-                        setTimeout(() => setIsOpen(false), 3000);
+                        setTimeout(() => setIsOpen(false), 2000);
                     }
                 })()
             }
@@ -193,7 +198,7 @@ export default function Game() {
                 if (response.status === 200){
                     setPopupContext(`Game saved`);
                     setIsOpen(true);
-                    setTimeout(() => setIsOpen(false), 4000);
+                    setTimeout(() => setIsOpen(false), 2000);
                 }
             })()
         }else{
@@ -209,7 +214,7 @@ export default function Game() {
                     right_text: yourGame.right_text
                 }),
                 finished: false,
-                score: gamePlate.length**2,
+                score: difficulty*gamePlate.length**2,
                 save: values.save,
                 player_id: player.id
             };
@@ -219,10 +224,13 @@ export default function Game() {
                 setIsSavedGame(true);
                 setPopupContext(`Game saved under ${values.save}`);
                 setIsOpen(true);
+                setTimeout(() => window.location.replace(`/play/${values.save}`), 1500);
             }
         })()}
-        setTimeout(() => setIsOpen(false), 4000);
+        setTimeout(() => setIsOpen(false), 2000);
     }
+
+    console.log("d", yourGame)
 
     return(
         <>
@@ -230,40 +238,48 @@ export default function Game() {
         <>
         <div className="Game" id="content">
             <div id="grid2">
-                <button className="rulesbutton" id="left" onClick={() => {
-                    if (Client.connected){Client.publish("rules", resources.rules)}
-                    setIsRulesOpen(!isRulesOpen);
-                }}>?</button>
+                
             {isSavedGame ? (
                 <div className="buttons">
                     <button onClick={()=>{
-                        setIsSavedGame(false);
-                        setSize(4);
-                    }}>New Game</button>
+                        window.location.replace('/play');
+                    }} id="new_game">New Game</button>
                 </div>
                 
             ):(
-            <div className="create">
+            <div className="create" id="col">
                 <div className="nag">Create your game</div>
+                <div>
                 Size: 
                 {sizes.map(el => 
-                    <button className={buttonClasses[el-2]} onClick={() => {
+                    <button className={sizeButtonClasses[el-2]} onClick={() => {
                             setSize(el);
                     }} id={`size_${el}`} key={`size_${el}`}>
                         <div className="size">{el}</div>
                     </button>
                 )}
+                </div>
+                <div>
+                Dificulty:
+                {difficulty_levels.map(el => 
+                    <button className={difficultyButtonClasses[el-1]} onClick={() => {
+                            setDifficulty(el);
+                    }} id={`size_${el}`} key={`size_${el}`}>
+                        <div className="size">{el}</div>
+                    </button>
+                )}
+                </div>
             </div>)}
             </div>
             <div className="top_text" id="row">
                 {yourGame.top_text.map(el => 
-                    <div className="pod"><span>{el}</span></div>
+                    <div className="pod"><span>{el === 0 ? "" : el}</span></div>
                 )}
             </div>
             <div id="row">
             <div className="left_text" id="col">
                 {yourGame.left_text.map(el => 
-                    <div className="pod"><span>{el}</span></div>
+                    <div className="pod"><span>{el === 0 ? "" : el}</span></div>
                 )}
             </div>
             <div className="plate">
@@ -278,22 +294,33 @@ export default function Game() {
             </div>
             <div className="right_text" id="col">
                 {yourGame.right_text.map(el => 
-                    <div className="pod"><span>{el}</span></div>
+                    <div className="pod"><span>{el === 0 ? "" : el}</span></div>
                 )}
             </div>
             </div>
             <div className="bottom_text" id="row">
                 {yourGame.bottom_text.map(el => 
-                    <div className="pod"><span>{el}</span></div>
+                    <div className="pod"><span>{el === 0 ? "" : el}</span></div>
                 )}
             </div>
             {isWrong && (
                 <span className="sorry">{popupContext}</span>
             )}
+            {isSavedGame ? (
+                <div className="buttons" id="row">
+                    <button onClick={() => handleCheck()}>
+                        Check
+                    </button>
+                    <div className="field">{save_name}</div>
+                    <button onClick={() => handleSave()}>
+                        Save
+                    </button>
+                </div>
+            ):(
             <div className="buttons" id="row">
-            <button onClick={() => handleCheck()}>
-                Check
-            </button>
+                <button onClick={() => handleCheck()}>
+                    Check
+                </button>
             <Formik
                 initialValues={{
                     save: ""
@@ -314,20 +341,13 @@ export default function Game() {
                     </Form>
                 )}
             </Formik>
-            {/* <button onClick={() => handleSave()}>
-                Save
-            </button> */}
             </div>
+            )}
         </div>
         {isOpen && <Popup
             content={popupContext}
             handleClose={() => {setIsOpen(false)}}
         />}
-        {isRulesOpen && 
-            <div className="rules">
-                {rules}
-            </div>
-        }
         </>
         ):(
             <div className="content">No game under that name</div>
