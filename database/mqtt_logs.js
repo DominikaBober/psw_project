@@ -8,6 +8,7 @@ Client.on('connect', () => {
     console.log("connected")
     Client.subscribe('userLogs');
     Client.subscribe('gameLogs');
+    Client.subscribe('chat');
     setInterval(() => {
         let randomId = Math.floor(Math.random() * fun_facts.length);
         Client.publish('funFacts', fun_facts[randomId])
