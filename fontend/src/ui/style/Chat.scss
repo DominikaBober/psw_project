@@ -1,0 +1,58 @@
+$grape: #4A1F55;
+$glacier: #b0d3e0;
+$orange: #F7835C;
+$violet: #C189D9;
+$red: #64003C;
+$bright_red: #F04951;
+.Chat{
+    padding: 30px;
+    .nag{font-size: xx-large;}
+}
+.chat{
+    height: 300px;
+    background-color: rgba(176, 211, 224,  0.5);
+    border: solid 1px rgba(176, 211, 224,  0.6);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    overflow-y: auto;
+    font-size: large;
+    justify-content: flex-end;
+    border-radius: 5px;
+    .message{
+        align-self: flex-start;
+        position: relative;
+        bottom: 0;
+        text-align: left;
+        margin: 2px;
+    }
+}
+.chatter{
+    .Form{
+        margin-top: 10px;
+        button{
+            padding: 7px;
+            color: $grape;
+            border: none;
+            border-radius: 5px;
+            background-color: $violet;
+            align-self: flex-end;
+            margin-left: 10px;
+            font-size: large;
+        }
+    }
+    .field{
+        background: none;
+        color: $grape;
+        border: none;
+        border-right: solid 2px $glacier;
+        border-bottom: solid 2px $glacier;
+        font-size: large;
+        align-self: center;
+        padding: 7px;
+    } 
+
+}
