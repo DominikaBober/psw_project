@@ -40,8 +40,8 @@ router.post('/', async (req, res) => {
     }
 
     const insertedGameRows = await client.query(
-        "INSERT INTO games (start_date, end_date, plate, finished, save, player_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-        [gameToAdd.start_date, null, gameToAdd.plate, false, null, gameToAdd.player_id]
+        "INSERT INTO games (start_date, play_time, end_date, plate, finished, save, score, player_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+        [gameToAdd.start_date, gameToAdd.play_time, gameToAdd.end_date, gameToAdd.plate, gameToAdd.finished, gameToAdd.save, gameToAdd.score, gameToAdd.player_id]
       );
 
     const insertedGame = insertedGameRows.rows[0];
@@ -57,8 +57,8 @@ router.put('/:id', async (req, res) => {
             return res.status(500).send(messages.PLAYER_NOT_EXISTS);
         }
     }
-    const result = await client.query(`UPDATE movie SET start_date = $1, end_date = $2, plate = $3, finished = $4, save = $5, player_id = $6 WHERE id = $7`,
-        [gameToAdd.start_date, gameToAdd.end_date, gameToAdd.plate, gameToAdd.finished, gameToAdd.save, gameToAdd.player_id, id]
+    const result = await client.query(`UPDATE games SET start_date = $1, play_time= $2, end_date = $3, plate = $4, finished = $5, save = $6, score=$7 ,player_id = $8 WHERE id = $9`,
+        [gameToAdd.start_date, gameToAdd.play_time, gameToAdd.end_date, gameToAdd.plate, gameToAdd.finished, gameToAdd.save, gameToAdd.score, gameToAdd.player_id, id]
     );
     return result.rowCount > 0 ? res.send(gameToAdd) : res.sendStatus(400);
 });
@@ -71,23 +71,26 @@ router.delete('/:id', async (req, res) => {
 
 router.patch('/:id/finish', async (req, res) => {
     const id = req.params.id;
-    const result = await client.query(`UPDATE movie SET finished = $1 WHERE id = $2`,
-        [true, id]
+    const play_time = req.body.play_time;
+    const result = await client.query(`UPDATE games SET play_time=$1, end_date = $2, finished = $3 WHERE id = $4`,
+        [play_time, new Date().toISOString().slice(0, 19).replace('T', ' '), true, id]
     );
     return result.rowCount > 0 ? res.sendStatus(200) : res.sendStatus(400);
 });
 
-router.patch('/:id/save', async (req, res) => {
-    const gameToAdd = req.body.save_name
-    const id = req.params.id;
-    const duplicate = await client.query("SELECT * FROM games WHERE save = $1 AND id = $2", [ gameToAdd.save, id ]);
-    if(duplicate.rows[0]) {
-        return res.status(500).send(messages.SAVE_DUPLICATE);
-    }
-    const result = await client.query(`UPDATE movie SET save = $1 WHERE id = $2`,
-        [gameToAdd.save, id]
-    );
-    return result.rowCount > 0 ? res.sendStatus(200) : res.sendStatus(400);
-});
+// router.patch('/:id/save', async (req, res) => {
+//     const gameToAdd = req.body.save_name
+//     const id = req.params.id;
+//     const player = await client.query("SELECT player_id FROM games WHERE id = $2", [ gameToAdd.save, id ]);
+//     const duplicate = await client.query("SELECT * FROM games WHERE save = $1 AND player_id = $2", [ gameToAdd.save, player.rows[0] ]);
+//     if(duplicate.rows[0]) {
+//         return res.status(500).send(messages.SAVE_DUPLICATE);
+//     }
+//     const update = await client.query(`UPDATE games SET save = $1 WHERE id = $2`,
+//         [gameToAdd.save, id]
+//     );
+//     const result = await client.query("SELECT * FROM games WHERE save = $1 AND player_id = $2", [ gameToAdd.save, player.rows[0] ]);
+//     return result.rows[0] ? res.send(result.rows[0] ) : res.send(500);
+// });
 
 module.exports = router;

@@ -33,18 +33,18 @@ CREATE TABLE IF NOT EXISTS players (
   login VARCHAR(60) UNIQUE NOT NULL,
   password VARCHAR(60) NOT NULL,
   login_date DATE NOT NULL,
-  score INTEGER NOT NULL,
-  played_games INTEGER NOT NULL,
   role VARCHAR(60) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS games (
   id SERIAL PRIMARY KEY,
   start_date DATE NOT NULL,
+  play_time INTEGER NOT NULL,
   end_date DATE NULL,
   plate VARCHAR(500) NOT NULL,
   finished BOOLEAN NOT NULL,
   save VARCHAR(50) NULL,
+  score INTEGER NULL,
   player_id INTEGER NOT NULL, 
   FOREIGN KEY (player_id) REFERENCES players (id)
 );
