@@ -23,16 +23,16 @@ export default function Game() {
     const [playerGames, setPlayerGames] = useState([])
     const sizes = [2, 3, 4]
     const [size, setSize] = useState(3);
-    const [isError, setIsError] = useState(false);
+    const [isError, setIsError] = useState(true);
     const [buttonClasses, setButtonClasses] = useState(["unchecked", "checked", "unchecked"]);
-    const [all_games, set_all_games] = useState(parseInt(size) === 2 ? all_games_2 : parseInt(size) === 3 ? all_games_3 : all_games_4);
-    const [yourGame, setYourGame] = useState(all_games[Object.keys(all_games)[Math.floor(Math.random()*Object.keys(all_games).length)]]);
-    const [gamePlate, setGamePlate] = useState(yourGame.plate.map(row => row.map(el => 0)));
+    const [all_games, set_all_games] = useState([]);
+    const [yourGame, setYourGame] = useState([]);
+    const [gamePlate, setGamePlate] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [isWrong, setIsWrong] = useState(false);
     const [gameEnded, setGameEnded] = useState(false);
     const [popupContext, setPopupContext] = useState("");
-    const [all_results, set_all_results] = useState(check_results(yourGame, all_games));
+    const [all_results, set_all_results] = useState([]);
 
     const ValidateSave = (value) => {
         if (!value) return "required";
@@ -74,6 +74,7 @@ export default function Game() {
             setGamePlate(temp_your_game.plate.map(row => row.map(el => 0)))
             set_all_results(check_results(temp_your_game, temp_all_games));
             setButtonClasses(temp_classes);
+            setIsError(false)
         }
         Cookies.set(`startGameDate`, new Date().toISOString().slice(0, 19).replace('T', ' '));
     },[size])
@@ -200,7 +201,7 @@ export default function Game() {
             };
             const response = await save_game(game_save);
             if (response.status === 200){
-                setYourGame(response.data)
+                setYourSavedGame(response.data)
                 setIsSavedGame(true);
                 setPopupContext(`Game saved under ${values.save}`);
                 setIsOpen(true);
