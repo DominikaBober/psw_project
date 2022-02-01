@@ -9,6 +9,7 @@ import Popup from "./popup";
 import Footer from './Footer';
 import Ranking from './Ranking';
 import Player from './Player';
+import LoadGame from './LoadGame';
 
 import { create_user, check_if_good_password, check_if_exists } from '../ducks/login/actions';
 
@@ -18,7 +19,7 @@ const rules = require('../ducks/game/rules.json').rules
 
 function App() {
 
-    const [isLogin, setIsLogin] = useState(false);
+    const [isLogin, setIsLogin] = useState(Cookies.get(`loggedUserLogin`) !== undefined);
     const [startLog, setStartLog] = useState(false);
     const [isUserCreate, setIsUserCreate] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -113,7 +114,18 @@ function App() {
             </div>
         ):(
             <div>
-                <Navbar />
+                <div className="nav" id="row">
+                        <Link to="/ranking" id="link">Ranking</Link>
+                        <Link to="/play"  id="link">Play</Link>
+                        <div className="profile" id="col">
+                            <Link to={`/player/${Cookies.get(`loggedUserId`)}`} id="link">Your Profile</Link>
+                            <button onClick={()=> {
+                                Cookies.remove(`loggedUserLogin`);
+                                Cookies.remove(`loggedUserId`);
+                                setIsLogin(false);
+                        }} id="link">Log out</button>
+                        </div>
+                </div>
                 <Switch className="content">
                     <Route exact path="/play">
                         <Game size={3}/>
@@ -123,6 +135,9 @@ function App() {
                     </Route>
                     <Route exact path="/player/:id">
                         <Player/>
+                    </Route>
+                    <Route exact path="/play/:save_name">
+                        <LoadGame/>
                     </Route>
                 </Switch>
             </div>
@@ -137,13 +152,3 @@ function App() {
 }
   
 export default App;
-
-function Navbar() {
-  return (
-      <div className="nav">
-            <Link to="/ranking" id="link">Ranking</Link>
-            <Link to="/play"  id="link">Play</Link>
-            {/* <Link to="/profile"><a>Your Profile</a></Link> */}
-      </div>
-  );
-}
