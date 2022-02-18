@@ -174,11 +174,11 @@ function App() {
                         </div>
                     </Route>
                 </Switch>
-                {isRulesOpen && 
-                    <div className="rules">
+                {/* {isRulesOpen &&  */}
+                    <div className={rules!== "" && (isRulesOpen? "rules": "hide_rules")}>
                         {rules}
                     </div>
-                }
+                {/* } */}
             </div>
         )}
         {isOpen && <Popup

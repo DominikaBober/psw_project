@@ -230,7 +230,7 @@ export default function Game() {
         setTimeout(() => setIsOpen(false), 2000);
     }
 
-    console.log("d", yourGame)
+    console.log("d", yourGame, difficulty)
 
     return(
         <>
