@@ -159,18 +159,12 @@ body{
 }
 .popup-box {
     position: absolute;
-    // font-family: Magiel-Black;
-    // text-shadow: 2px 3px $brigth;
     font-size: xx-large;
     color: $grape;
     top: 0;
     left: 30%;
     width: max-content;
-    // box-shadow: 0 0 0 20px rgba(153, 115, 170, 0.5);
     overflow: hidden;
-    // animation: 10s slide-up-down;
-    // -webkit-animation: slide-up-down 2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
-	//         animation: slide-up-down 2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
   } 
   .box {
     background-color: rgba(193, 137, 217,  0.6);
@@ -178,17 +172,6 @@ body{
     border-bottom-right-radius: 10px;
     padding: 20px;
   }
-//   .close-icon {
-//     text-shadow: none;
-//     cursor: pointer;
-//     position: fixed;
-//     right: calc(25% + 65px);
-//     top: calc(100vh - 75vh - 10px);
-//     line-height: 20px;
-//     text-align: center;
-//     font-size: 20px;
-//   }
-//   .close-icon:hover{color: #e48257}
 
 .rulesbutton{
     background: none;
@@ -277,14 +260,14 @@ body{
                 transform: translateX(-100px);
       }
       100% {
-        -webkit-transform: translateX(10px);
-                transform: translateX(10px);
+        -webkit-transform: translateX(0);
+                transform: translateX(0);
       }
   }
 @keyframes hide-rules {
     0% {
-        -webkit-transform: translateX(10px);
-                transform: translateX(10px);
+        -webkit-transform: translateX(0);
+                transform: translateX(0);
       }
       100% {
         -webkit-transform: translateX(-300px);

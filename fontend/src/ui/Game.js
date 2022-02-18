@@ -34,7 +34,8 @@ export default function Game() {
     const [gamePlate, setGamePlate] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [isWrong, setIsWrong] = useState(false);
-    const [gameEnded, setGameEnded] = useState(false);
+    const [topPopup, setTopPopup] = useState(false);
+    const [topPopupContext, setTopPopupContext] = useState(false);
     const [popupContext, setPopupContext] = useState("");
     const [all_results, set_all_results] = useState([]);
     
@@ -126,11 +127,10 @@ export default function Game() {
                     console.log("zapis", response)
                     if (response.status === 200){
                         setIsWrong(false);
-                        setPopupContext("Congrats, you won !!");
-                        setIsOpen(true);
-                        setTimeout(() => setGameEnded(true), 2000);
+                        setTopPopupContext("Congrats, you won !!");
+                        setTopPopup(true);
                         setTimeout(() => {
-                            setIsOpen(false)
+                            setTopPopup(false)
                             window.location.replace(`/player/${player.id}`);
                         }, 2000);
                         
@@ -162,16 +162,19 @@ export default function Game() {
                     console.log("zapis", response)
                     if (response.status === 200){
                         setIsWrong(false);
-                        setPopupContext("Congrats, you won !!");
-                        setIsOpen(true);
-                        setTimeout(() => setGameEnded(true), 2000);
-                        setTimeout(() => setIsOpen(false), 2000);
+                        setTopPopupContext("Congrats, you won !!");
+                        setTopPopup(true);
+                        setTimeout(() => {
+                            setTopPopup(false)
+                            window.location.replace(`/play`);
+                        }, 2000);
                     }
                 })()
             }
         }else{
             setPopupContext("Sorry, try to change something");
             setIsWrong(true);
+            setTimeout(() => {setIsWrong(false)}, 3000);
         }
     }
 
@@ -196,9 +199,9 @@ export default function Game() {
                 };
                 const response = await update_game(game_save, yourSavedGame.id);
                 if (response.status === 200){
-                    setPopupContext(`Game saved`);
-                    setIsOpen(true);
-                    setTimeout(() => setIsOpen(false), 2000);
+                    setTopPopupContext(`Game saved`);
+                    setTopPopup(true);
+                    setTimeout(() => setTopPopup(false), 3000);
                 }
             })()
         }else{
@@ -222,9 +225,9 @@ export default function Game() {
             if (response.status === 200){
                 setYourSavedGame(response.data)
                 setIsSavedGame(true);
-                setPopupContext(`Game saved under ${values.save}`);
-                setIsOpen(true);
-                setTimeout(() => window.location.replace(`/play/${values.save}`), 1500);
+                setTopPopupContext(`Game saved under ${values.save}`);
+                setTopPopup(true);
+                setTimeout(() => window.location.replace(`/play/${values.save}`), 3000);
             }
         })()}
         setTimeout(() => setIsOpen(false), 2000);
@@ -344,10 +347,9 @@ export default function Game() {
             </div>
             )}
         </div>
-        {isOpen && <Popup
-            content={popupContext}
-            handleClose={() => {setIsOpen(false)}}
-        />}
+        {topPopup && <div className="end_game">
+            {topPopupContext}
+        </div>}
         </>
         ):(
             <div className="content">No game under that name</div>

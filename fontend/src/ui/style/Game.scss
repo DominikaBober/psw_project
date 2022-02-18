@@ -96,3 +96,35 @@ $red: #64003C;
     }
 }
 #new_game{width: max-content;}
+
+.end_game{
+    background-color: rgba(193, 137, 217,  0.6);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 20px;
+    position: absolute;
+    font-size: xx-large;
+    color: $grape;
+    top: 0;
+    left: 30%;
+    width: max-content;
+    overflow: hidden;
+    animation: 3s top-popup;
+    -webkit-animation: top-popup 3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	        animation: top-popup 3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@keyframes top-popup {
+    0% {
+        -webkit-transform: translateY(-80px);
+                transform: translateY(-80px);
+    }
+    50% {
+        -webkit-transform: translateY(0);
+                transform: translateY(0);
+    }
+    100% {
+        -webkit-transform: translateY(-100px);
+                transform: translateY(-100px);
+    }
+  }
